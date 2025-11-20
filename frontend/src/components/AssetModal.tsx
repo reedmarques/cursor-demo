@@ -17,6 +17,18 @@ export default function AssetModal() {
   const [newTag, setNewTag] = useState('');
   const [showTagInput, setShowTagInput] = useState(false);
 
+  const handleClose = () => {
+    setSelectedAsset(null);
+    setIsEditing(false);
+  };
+
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Only close if clicking the backdrop itself, not the modal content
+    if (e.target === e.currentTarget) {
+      handleClose();
+    }
+  };
+
   useEffect(() => {
     if (selectedAsset) {
       setFormData({
@@ -31,12 +43,21 @@ export default function AssetModal() {
     }
   }, [selectedAsset]);
 
-  if (!selectedAsset) return null;
+  // Handle Escape key to close modal
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleClose();
+      }
+    };
 
-  const handleClose = () => {
-    setSelectedAsset(null);
-    setIsEditing(false);
-  };
+    if (selectedAsset) {
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [selectedAsset]);
+
+  if (!selectedAsset) return null;
 
   const handleSave = async () => {
     await updateAsset(selectedAsset.id, formData);
@@ -81,7 +102,10 @@ export default function AssetModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 animate-fade-in">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 animate-fade-in"
+      onClick={handleBackdropClick}
+    >
       <div className="bg-white rounded-lg w-full max-w-6xl h-[90vh] flex overflow-hidden shadow-2xl animate-slide-up">
         {/* Image Preview */}
         <div className="flex-1 bg-gray-900 flex items-center justify-center p-8">
